@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id       Int    @id @default(autoincrement())
+  name     String
+  clientId String
+  secretId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  payment Payment[]
+  pjBank  PjBank?
+}
+
+model Payment {
+  id          Int              @id @default(autoincrement())
+  externalId  String?
+  bankId      String?
+  bankStatus  String?
+  bankType    PaymentBankType?
+  paymentType PaymentType
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @default(now()) @updatedAt
+
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+  tenantId Int
+}
+
+model PjBank {
+  id               Int      @id @default(autoincrement())
+  credencialCartao String
+  xChave           String
+  webhook          String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @default(now()) @updatedAt
+  tenant           Tenant   @relation(fields: [tenantId], references: [id])
+  tenantId         Int      @unique
+}
+
+enum PaymentBankType {
+  PJBANK
+}
+
+enum PaymentType {
+  CREDIT_CARD
+}
